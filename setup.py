@@ -50,8 +50,7 @@ setup(name=meta['title'],
               'TEMPLATE = TEMPLATE.__main__:main'
           ]
       },
-      install_requires=['click', 'colorama'],  # colorama required for Windows support.
-      setup_requires=[],
+      install_requires=[],
       python_requires='>=3.6',
       data_files=[("", ["LICENSE"])]
       )

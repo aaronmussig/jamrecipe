@@ -24,7 +24,16 @@ import sys
 from TEMPLATE.common import make_sure_path_exists
 
 
-def colour(to_fmt, attr=None, fg=None, bg=None, is_tty=sys.stdout.isatty()):
+def supports_colour():
+    """Returns True if the running system's terminal supports colour.
+    https://github.com/django/django/blob/master/django/core/management/color.py
+    """
+    supported_platform = sys.platform != 'win32' or 'ANSICON' in os.environ
+    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+    return supported_platform and is_a_tty
+
+
+def colour(to_fmt, attr=None, fg=None, bg=None):
     """Format a string according to the following rules.
     http://www.termsys.demon.co.uk/vtansi.htm
 
@@ -38,15 +47,13 @@ def colour(to_fmt, attr=None, fg=None, bg=None, is_tty=sys.stdout.isatty()):
         The foreground colour to apply.
     bg : str
         The background colour to apply.
-    is_tty : bool
-        Evaluated at compile time, check if this is being piped out.
 
     Returns
     -------
     str
         A string formatted according to the specifications.
     """
-    if is_tty:
+    if not supports_colour():
         return to_fmt
     else:
         options_attr = {'reset': 0, 'bright': 1, 'dim': 2, 'underscore': 4,
@@ -87,20 +94,29 @@ def logger_setup(log_dir, log_file, program_name, version, silent, debug=False):
 
     class SpecialFormatter(logging.Formatter):
         """Terminal output rules"""
-        default_fmt = logging.Formatter(fmt="[%(asctime)s] {} %(message)s".
-                                        format(colour('INFO:', ['bright'])),
+        ts_i = colour('[%(asctime)s]', ['bright'], 'blue')
+        lvl_i = colour('INFO:', ['bright'], 'blue')
+
+        ts_d = colour('[%(asctime)s]', ['bright'], 'green')
+        lvl_d = colour('DEBUG:', ['bright'], 'green')
+
+        ts_w = colour('[%(asctime)s]', ['bright'], 'yellow')
+        lvl_w = colour('WARN:', ['bright'], 'yellow')
+
+        ts_e = colour('[%(asctime)s]', ['bright'], 'red')
+        lvl_e = colour('ERROR:', ['bright'], 'red')
+
+        msg = '%(message)s'
+
+        default_fmt = logging.Formatter(fmt=f'{ts_i} {lvl_i} {msg}',
                                         datefmt="%Y-%m-%d %H:%M:%S")
-        debug_fmt = logging.Formatter(fmt="[%(asctime)s] {} %(message)s".
-                                      format(colour('DEBUG:', ['bright'], 'green')),
+        debug_fmt = logging.Formatter(fmt=f'{ts_d} {lvl_d} {msg}',
                                       datefmt="%Y-%m-%d %H:%M:%S")
-        info_fmt = logging.Formatter(fmt="[%(asctime)s] {} %(message)s".
-                                     format(colour('INFO:', ['bright'])),
+        info_fmt = logging.Formatter(fmt=f'{ts_i} {lvl_i} {msg}',
                                      datefmt="%Y-%m-%d %H:%M:%S")
-        warn_fmt = logging.Formatter(fmt="[%(asctime)s] {} %(message)s".
-                                     format(colour('WARNING:', ['bright'], 'yellow')),
+        warn_fmt = logging.Formatter(fmt=f'{ts_w} {lvl_w} {msg}',
                                      datefmt="%Y-%m-%d %H:%M:%S")
-        err_fmt = logging.Formatter(fmt="[%(asctime)s] {} %(message)s".
-                                    format(colour('ERROR:', ['bright'], 'red')),
+        err_fmt = logging.Formatter(fmt=f'{ts_e} {lvl_e} {msg}',
                                     datefmt="%Y-%m-%d %H:%M:%S")
 
         def format(self, record):
@@ -126,7 +142,7 @@ def logger_setup(log_dir, log_file, program_name, version, silent, debug=False):
             return self.fmt.format(record)
 
     # setup general properties of loggers
-    timestamp_logger = logging.getLogger('timestamp')
+    timestamp_logger = logging.getLogger('default')
     timestamp_logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
     no_timestamp_logger = logging.getLogger('no_timestamp')
