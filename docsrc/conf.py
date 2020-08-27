@@ -1,31 +1,21 @@
 import os
 import sys
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
-
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+from datetime import datetime
 sys.path.insert(0, os.path.abspath('..'))
+from TEMPLATE import __author__, __version__, __title__
+
+# Configuration file for the Sphinx documentation builder.
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Project information -----------------------------------------------------
 
-project = 'TEMPLATE'
-copyright = '2020, Aaron Mussig'
-author = 'Aaron Mussig'
+project = __title__
+copyright = f'{datetime.now().year}, {__author__}'
+author = __author__
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
-
+release = __version__
+version = __version__
 
 # -- General configuration ---------------------------------------------------
 

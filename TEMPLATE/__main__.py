@@ -18,9 +18,11 @@
 import argparse
 import logging
 import sys
+import traceback
 from gettext import gettext
 
 from TEMPLATE import __version__, __title__, __url__
+from TEMPLATE.exceptions import JAMException
 from TEMPLATE.logging import colour
 from TEMPLATE.logging import logger_setup
 
@@ -30,8 +32,7 @@ class ColoredArgParser(argparse.ArgumentParser):
         if file is None:
             file = sys.stdout
         lines = ['',
-                 '  ▖▙ ' + colour(__title__, fg='blue') + ' ' + colour(f'v{__version__} ▟▗', fg='cyan'),
-                 '',
+                 '  ' + colour(__title__, fg='blue') + ' ' + colour(f'v{__version__}', fg='cyan'),
                  f'  {__url__}',
                  ''
                  '\n']
@@ -59,21 +60,28 @@ class ColoredArgParser(argparse.ArgumentParser):
 
 def main_parser():
     parser = ColoredArgParser(prog=__title__)
-    subparsers = parser.add_subparsers(help="--", dest='subparser_name')
+    subparsers = parser.add_subparsers(dest='subparser_name')
+    subparsers.metavar = 'methods'
 
     # define common shared arguments
     base_subparser = argparse.ArgumentParser(add_help=False)
     base_subparser.add_argument('--debug', help='output debugging information', action='store_true', default=False)
 
     # subparser a
-    subparser_a = subparsers.add_parser('subparser_a',
-                                        help='subparser a help.',
+    subparser_a = subparsers.add_parser('foo',
+                                        help='foo help.',
                                         parents=[base_subparser])
 
-    mutual_genome_denovo_wf = subparser_a.add_argument_group('mutually exclusive required arguments')
-    mutex_group = mutual_genome_denovo_wf.add_mutually_exclusive_group(required=True)
+    sa_mutex = subparser_a.add_argument_group('mutually exclusive required arguments')
+    mutex_group = sa_mutex.add_mutually_exclusive_group(required=True)
     mutex_group.add_argument('--a',
                              help='add a.')
+
+    subparser_b = subparsers.add_parser('bar',
+                                        help='bar help.',
+                                        parents=[base_subparser])
+    subparser_b.add_argument('--b',
+                             help='add b.')
 
     return parser
 
@@ -95,11 +103,48 @@ def main():
                      f'{__title__}.log', __title__, __version__, False,
                      hasattr(args, 'debug') and args.debug)
         log = logging.getLogger('default')
+        warn_log = logging.getLogger('warnings')
 
-        log.info('inf')
-        log.warning('war')
-        log.error('err')
-        log.debug('debug')
+        try:
+            # Do something
+            pass
+            log.info('inf')
+            log.warning('war')
+            log.error('err')
+            log.debug('debug')
+        except SystemExit:
+            log.error('Controlled exit resulting from early termination.')
+            sys.exit(1)
+        except KeyboardInterrupt:
+            log.error('Controlled exit resulting from keyboard interrupt.')
+            sys.exit(1)
+        except JAMException as e:
+            if len(str(e)) > 0:
+                log.error('{}'.format(e))
+            log.error('Controlled exit resulting from an unrecoverable error or warning (see warnings.log).')
+
+            msg = 'Controlled exit resulting from an unrecoverable error or warning.\n\n'
+            msg += '=' * 80 + '\n'
+            msg += 'EXCEPTION: {}\n'.format(type(e).__name__)
+            msg += '  MESSAGE: {}\n'.format(e)
+            msg += '_' * 80 + '\n\n'
+            msg += traceback.format_exc()
+            msg += '=' * 80
+            warn_log.info(msg)
+            sys.exit(1)
+        except Exception as e:
+            if len(str(e)) > 0:
+                log.error('{}'.format(e))
+            log.error('Uncontrolled exit resulting from an unexpected error (see warnings.log).')
+            msg = 'Controlled exit resulting from an unrecoverable error or warning.\n\n'
+            msg += '=' * 80 + '\n'
+            msg += 'EXCEPTION: {}\n'.format(type(e).__name__)
+            msg += '  MESSAGE: {}\n'.format(e)
+            msg += '_' * 80 + '\n\n'
+            msg += traceback.format_exc()
+            msg += '=' * 80
+            warn_log.info(msg)
+            sys.exit(1)
 
     # Done - no errors.
     sys.exit(0)

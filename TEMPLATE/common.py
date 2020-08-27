@@ -1,9 +1,8 @@
-
 import os
 
 
 def make_sure_path_exists(path):
-    """Create directory if it does not exist.
+    """Create a directory if it does not exist.
 
     Parameters
     ----------
@@ -17,16 +16,11 @@ def make_sure_path_exists(path):
 
     Raises
     ------
-    BioLibIOException
+    OSError
         If an error was encountered while creating the directory.
     """
-    if not path:
-        # lack of a path qualifier is acceptable as this
-        # simply specifies the current directory
+    if not path or os.path.isdir(path):
         return True
-    elif os.path.isdir(path):
-        return True
-
     try:
         os.makedirs(path)
         return True
