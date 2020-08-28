@@ -20,11 +20,11 @@ import argparse
 from corejam.argparse import CustomArgParser
 from corejam.argparse import jam_parser
 
-from TEMPLATE import __title__
+from TEMPLATE import __title__, __version__, __url__
 
 
 def main_parser():
-    parser = CustomArgParser(prog=__title__)
+    parser = CustomArgParser(prog=__title__, ver=__version__, url=__url__)
     subparsers = parser.add_subparsers(dest='subparser_name')
     subparsers.metavar = 'methods'
 
@@ -52,7 +52,7 @@ def main_parser():
 
 
 def main():
-    with jam_parser(main_parser()) as args:
+    with jam_parser(main_parser(), __title__, __version__) as args:
         pass
 
 
