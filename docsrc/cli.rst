@@ -1,8 +1,8 @@
-============
 CLI
-============
+===
 
-Foo:
+TEMPLATE
+--------
 
 .. argparse::
    :module: TEMPLATE.__main__

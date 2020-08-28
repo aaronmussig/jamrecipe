@@ -27,9 +27,9 @@ setup(name=meta['title'],
       url=meta['url'],
       license=meta['license'],
       project_urls={
-          "Bug Tracker": "https://github.com/aaronmussig/TEMPLATE/issues",
-          "Documentation": "https://github.com/aaronmussig/TEMPLATE",
-          "Source Code": "https://github.com/aaronmussig/TEMPLATE",
+          'Bug Tracker': meta['bug_url'],
+          'Documentation': meta['doc_url'],
+          'Source Code': meta['src_url'],
       },
       classifiers=[
           'Development Status :: 4 - Beta',
@@ -50,7 +50,7 @@ setup(name=meta['title'],
               'TEMPLATE = TEMPLATE.__main__:main'
           ]
       },
-      install_requires=[],
+      install_requires=['corejam'],
       python_requires='>=3.6',
       data_files=[("", ["LICENSE"])]
       )

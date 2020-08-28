@@ -42,7 +42,7 @@ upload:
 	@python3 -m twine upload dist/* --verbose
 
 upload-dev:
-	@python3 -m twine upload --repository --verbose testpypi dist/*
+	@python3 -m twine upload --repository testpypi --verbose dist/*
 
 build:
 	@git branch --color=never | grep "* master" > /dev/null
